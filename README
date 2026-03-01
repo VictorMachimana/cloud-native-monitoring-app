@@ -1,0 +1,17 @@
+# Live Cloud Native Monitoring App
+A professional-grade system health dashboard built with **Python**, **Flask**, and **Plotly.js**. This application monitors real-time CPU, Memory, and Disk utilization, providing analogue visual telemetry and automated SMTP email alerts when resource thresholds are breached.
+
+
+## Features
+- **Analogue Telemetry**: Interactive, high-fidelity gauges for CPU, RAM, and Disk space.
+- **Automated Alerting**: Sends email notifications via SMTP when resources exceed 80%.
+- **Secure Configuration**: Fully decoupled secrets using environment variables.
+- **Modern UI**: Clean, spacious "SaaS-style" dashboard with pulsing heartbeat indicators.
+- **Resilient Assets**: Locally hosted JavaScript libraries to prevent CDN/403 failures.
+
+## Tech Stack
+- **Backend**: Python 3.x, Flask
+- **Metrics**: `psutil` (System process and system utilities)
+- **Frontend**: Bootstrap 5, Plotly.js (Analogue Data Visualization)
+- **Security**: `python-dotenv` (Environment Variable Management)
+- **Alerting**: `Flask-Mail` (SMTP Integration)

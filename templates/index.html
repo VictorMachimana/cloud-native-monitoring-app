@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="refresh" content="300" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>OpsCenter | Cloud Native Monitor</title>
+
+        <!-- 1. External CSS (Bootstrap) -->
+        <link href="https://cdn.jsdelivr.net" rel="stylesheet" />
+
+        <style>
+            /* Global Reset & Body Styling */
+            body {
+                background-color: #f1f5f9;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    Roboto,
+                    sans-serif;
+                margin: 0;
+                padding: 20px;
+            }
+
+            /* Main Dashboard Card */
+            .main-dashboard-card {
+                background-color: #263242;
+                width: 100%;
+                max-width: 550px;
+                /* padding: 4rem 2.5rem; */
+                border-radius: 32px;
+                box-shadow:
+                    0 20px 25px -5px rgba(0, 0, 0, 0.04),
+                    0 10px 10px -5px rgba(0, 0, 0, 0.02);
+                border: 1px solid rgba(0, 0, 0, 0.05);
+            }
+
+            /* Header Section */
+            .header-section {
+                margin: 2.5rem;
+                text-align: center;
+         
+            }
+            h1 {
+                font-size: 1.75rem;
+                font-weight: 800;
+                color: #f3f3f3;
+                letter-spacing: -0.03em;
+                line-height: 1.2;
+            }
+            h2 {
+                font-size: 1.05rem;
+                font-weight: 400;
+                color: #f3f3f3;
+                margin-top: 0.5rem;
+                margin-bottom: 2rem;
+            }
+
+            /* Modern Status Pill */
+            .status-pill {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.7rem 1.6rem;
+                border-radius: 50px;
+                font-size: 0.75rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+            }
+            .bg-soft-success {
+                background-color: #ecfdf5;
+                color: #059669;
+                border: 1px solid #d1fae5;
+            }
+            .bg-soft-danger {
+                background-color: #fef2f2;
+                color: #dc2626;
+                border: 1px solid #fee2e2;
+            }
+
+            /* Pulsing Dot Animation */
+            @keyframes pulse-dot {
+                0% {
+                    transform: scale(0.9);
+                    opacity: 0.6;
+                }
+                50% {
+                    transform: scale(1.3);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(0.9);
+                    opacity: 0.6;
+                }
+            }
+            .pulse {
+                animation: pulse-dot 2s infinite ease-in-out;
+                margin-right: 12px;
+                font-size: 0.9rem;
+            }
+
+            /* Analogue Gauges Container */
+            .gauge-container {
+                display: flex;
+                background-color: #ebebeb;
+                flex-direction: column;
+                align-items: center;
+                gap: 0px;
+                padding: 2.5rem 0rem;
+            }
+
+            footer {
+                margin-top: 2rem;
+                font-size: 0.8rem;
+                color: #94a3b8;
+                border-top: 1px solid #f1f5f9;
+                padding-top: 1.5rem;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="main-dashboard-card text-center shadow-lg">
+            <!-- Header -->
+            <div class="header-section">
+                <h1>Live Cloud Native Monitoring App</h1>
+                <h2>Analogue System Telemetry</h2>
+
+                <div class="d-flex justify-content-center">
+                    <div
+                        class="status-pill {% if status == 'Healthy' %}bg-soft-success{% else %}bg-soft-danger{% endif %} shadow-sm"
+                    >
+                        <span
+                            style="
+                                color: #64748b;
+                                font-weight: 800;
+                                margin-right: 12px;
+                                border-right: 1px solid rgba(0, 0, 0, 0.1);
+                                padding-right: 12px;
+                            "
+                            >STATUS:</span
+                        >
+                        <span
+                            class="pulse text-{% if status == 'Healthy' %}success{% else %}danger{% endif %}"
+                            >●</span
+                        >
+                        {{ status }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gauge Elements -->
+            <div class="gauge-container">
+                <div id="cpu-gauge"></div>
+                <div id="mem-gauge"></div>
+                <div id="disk-gauge"></div>
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <p class="mb-1"><strong>Node:</strong> Production-Cluster-01</p>
+                <p class="mb-0">Auto-refresh (5m) | <span id="clock"></span></p>
+            </footer>
+        </div>
+
+        <!-- 2. Local Plotly JS (Required to bypass 403 CDN errors) -->
+        <!-- Ensure you have saved plotly.min.js in your /static folder -->
+        <script src="{{ url_for('static', filename='plotly.min.js') }}"></script>
+
+        <script>
+            /**
+             * buildGauge: Creates the Analogue data structure for Plotly
+             */
+            function buildGauge(value, title, color) {
+                // Force value to a number to prevent rendering errors
+                const numericValue = parseFloat(value) || 0;
+
+                return [
+                    {
+                        type: "indicator",
+                        mode: "gauge+number",
+                        value: numericValue,
+                        number: {
+                            suffix: "%",
+                            font: { size: 24, color: "#1e293b" },
+                        },
+                        title: {
+                            text: title,
+                            font: {
+                                size: 12,
+                                color: "#94a3b8",
+                                weight: "bold",
+                            },
+                        },
+                        gauge: {
+                            axis: {
+                                range: [null, 100],
+                                tickwidth: 1,
+                                tickcolor: "#cbd5e1",
+                            },
+                            bar: { color: color, thickness: 0.25 },
+                            bgcolor: "#f8fafc",
+                            steps: [
+                                {
+                                    range: [0, 50],
+                                    color: "rgba(52, 211, 153, 0.05)",
+                                },
+                                {
+                                    range: [50, 80],
+                                    color: "rgba(251, 191, 36, 0.05)",
+                                },
+                                {
+                                    range: [80, 100],
+                                    color: "rgba(248, 113, 113, 0.05)",
+                                },
+                            ],
+                            threshold: {
+                                line: { color: "#ef4444", width: 4 },
+                                thickness: 0.8,
+                                value: 80,
+                            },
+                        },
+                    },
+                ];
+            }
+
+            const layout = {
+                width: 400,
+                height: 160,
+                margin: { t: 40, b: 10, l: 30, r: 30 },
+                paper_bgcolor: "rgba(0,0,0,0)" /* Transparent background */,
+                font: { family: "Inter, sans-serif" },
+            };
+
+            // Initialize Plotly Charts using Flask variables
+            if (typeof Plotly !== "undefined") {
+                Plotly.newPlot(
+                    "cpu-gauge",
+                    buildGauge("{{ cpu }}", "CPU LOAD", "#3b82f6"),
+                    layout,
+                );
+                Plotly.newPlot(
+                    "mem-gauge",
+                    buildGauge("{{ mem }}", "RAM USAGE", "#06b6d4"),
+                    layout,
+                );
+                Plotly.newPlot(
+                    "disk-gauge",
+                    buildGauge("{{ disk }}", "DISK SPACE", "#8b5cf6"),
+                    layout,
+                );
+            } else {
+                console.error(
+                    "Critical Error: plotly.min.js failed to load from /static folder.",
+                );
+            }
+
+            // Set simple footer clock
+            document.getElementById("clock").innerText =
+                new Date().toLocaleTimeString();
+        </script>
+    </body>
+</html>
