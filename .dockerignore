@@ -1,0 +1,7 @@
+.git
+.gitignore
+.doc
+Dockerfile
+.dockerignore
+docker-compose*
+ecr_create_repo_script.py
