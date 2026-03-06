@@ -1,17 +1,62 @@
-# Live Cloud Native Monitoring App
-A professional-grade system health dashboard built with **Python**, **Flask**, and **Plotly.js**. This application monitors real-time CPU, Memory, and Disk utilization, providing analogue visual telemetry and automated SMTP email alerts when resource thresholds are breached.
+🚀 Live Cloud-Native Monitoring App
+A professional-grade system health dashboard built with Python, Flask, and Plotly.js. This application monitors real-time CPU, Memory, and Disk utilization, providing high-fidelity visual telemetry and automated SMTP email alerts when resource thresholds are breached.
 
+✨ Features
+* Real-time Telemetry: Interactive gauges for CPU, RAM, and Disk space powered by Plotly.js.
+* Smart Alerting: Automated SMTP notifications triggered at >80% resource utilization with anti-spam logic.
+* Containerized Architecture: Multi-stage Docker builds for optimized development and secure production.
+* Security-First: Runs as a non-root user in production to minimize attack surfaces.
+* Modern UI: Responsive "SaaS-style" dashboard built with Bootstrap 5.
 
-## Features
-- **Analogue Telemetry**: Interactive, high-fidelity gauges for CPU, RAM, and Disk space.
-- **Automated Alerting**: Sends email notifications via SMTP when resources exceed 80%.
-- **Secure Configuration**: Fully decoupled secrets using environment variables.
-- **Modern UI**: Clean, spacious "SaaS-style" dashboard with pulsing heartbeat indicators.
-- **Resilient Assets**: Locally hosted JavaScript libraries to prevent CDN/403 failures.
+🛠 Tech Stack
+* Backend: Python 3.10+, Flask
+* WSGI Server: Gunicorn (Production)
+* Metrics: psutil
+* Frontend: Plotly.js, Bootstrap 5, html
+* Alerting: Flask-Mail (SMTP)
+* DevOps: Docker, Docker Compose
 
-## Tech Stack
-- **Backend**: Python 3.x, Flask
-- **Metrics**: `psutil` (System process and system utilities)
-- **Frontend**: Bootstrap 5, Plotly.js (Analogue Data Visualization)
-- **Security**: `python-dotenv` (Environment Variable Management)
-- **Alerting**: `Flask-Mail` (SMTP Integration)
+------------------------------
+## 🏗 CI/CD Pipeline
+This project utilizes **GitHub Actions** for automated deployment:
+1. **Lint & Test**: Validates Python code and Dockerfile syntax.
+2. **Build & Push**: Packages the production-stage image and pushes it to a container registry.
+3. **Automated Deploy**: SSH into the production Droplet and executes `docker compose pull && docker compose up -d`.
+
+------------------------------
+
+🚀 How to Run
+
+1. Prerequisites
+* Docker & Docker Compose installed.
+* Gmail App Password: If using Gmail, generate an App Password (Regular passwords will not work).
+
+2. Environment Configuration
+* Create a .env file in the root directory and fill in your credentials:
+- MAIL_USERNAME=your-email@gmail.com
+- MAIL_PASSWORD=your-app-password
+- MAIL_DEFAULT_SENDER=your-email@gmail.com
+- MAIL_RECIPIENT=alert-receiver@gmail.com
+
+3. Development Mode (With Auto-Reloading)
+* This mode mounts your local code into the container. Any change you save in app.py will trigger an instant restart.
+- Run command: `docker compose up`
+* Access the dashboard at: http://localhost:5000
+
+4. Production Build (Secure & Optimized)
+* To build the hardened, non-root production image using Gunicorn:
+* Commands to run:
+# Build the production stage specifically
+`docker build --target production -t health-monitor:latest .`
+
+# Run the production container
+`docker run -p 5000:5000 --env-file .env health-monitor:latest`
+
+------------------------------
+🛡 Security & Optimization
+* Multi-Stage Build: Separates development dependencies from the final production artifact.
+* Non-Root Execution: The production container runs under myuser, preventing root-level exploits.
+* Unbuffered Logging: PYTHONUNBUFFERED=1 ensures real-time log visibility in Docker.
+
+------------------------------
+
