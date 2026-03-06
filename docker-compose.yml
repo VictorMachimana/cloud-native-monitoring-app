@@ -1,14 +1,39 @@
 services:
   web:
-    build:
-      context: .
-      target: development
+    image: victormacdevops/flask-system-health-monitor:latest
     ports:
       - "5000:5000"
-    volumes:
-      - .:/app
+    env_file: .env
     environment:
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
-      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER}
-      - MAIL_RECIPIENT=${MAIL_RECIPIENT}
+      - PYTHONUNBUFFERED=1
+      # Defaults for non-sensitive data
+      - MAIL_SERVER=${MAIL_SERVER:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+    
+    # Ensures the app stays up through crashes or server reboots
+    restart: unless-stopped
+    
+    # Verifies the app is actually responding, not just "running"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s # Wait for Gunicorn to initialize
+    
+    # 6. Infrastructure Protection
+    # Prevent a single app from crashing the entire Droplet
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M  # Hard limit to prevent (Out Of Memory) crashes
+        reservations:
+          memory: 128M  # Guaranteed minimum RAM
+    
+    # Prevents Docker logs from filling up the server's disk space
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
