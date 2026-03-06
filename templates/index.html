@@ -6,6 +6,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>OpsCenter | Cloud Native Monitor</title>
 
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+        />
+
         <!-- 1. External CSS (Bootstrap) -->
         <link href="https://cdn.jsdelivr.net" rel="stylesheet" />
 
@@ -28,13 +33,58 @@
                 padding: 20px;
             }
 
+            /* Container to stack buttons and card vertically */
+            .dashboard-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+
+            /* Button bar styling - now outside the card */
+            .top-social-bar {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 1.5rem; /* Space between buttons and the card */
+            }
+
+            .social-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                background-color: #263242 !important; /* Matches your card */
+                border-radius: 12px;
+                text-decoration: none !important;
+                transition: 0.3s;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Ensure the icon INSIDE the button is visible */
+            .social-btn i {
+                color: #ffffff !important;
+                font-size: 1.5rem;
+                display: inline-block;
+            }
+
+            .social-btn:hover {
+                transform: translateY(-3px);
+                filter: brightness(1.2);
+            }
+
+            /* Specific Brand Hover Colors */
+            .linkedin-btn:hover i {
+                color: #0a66c2 !important;
+            }
             /* Main Dashboard Card */
             .main-dashboard-card {
                 background-color: #263242;
                 width: 100%;
                 max-width: 550px;
                 /* padding: 4rem 2.5rem; */
-                border-radius: 32px;
+                border-radius: 24px;
                 box-shadow:
                     0 20px 25px -5px rgba(0, 0, 0, 0.04),
                     0 10px 10px -5px rgba(0, 0, 0, 0.02);
@@ -45,7 +95,6 @@
             .header-section {
                 margin: 2.5rem;
                 text-align: center;
-         
             }
             h1 {
                 font-size: 1.75rem;
@@ -123,50 +172,99 @@
                 padding-top: 1.5rem;
                 text-align: center;
             }
+
+            .footer-info {
+                font-size: 0.8rem;
+                color: #94a3b8;
+                margin-bottom: 1rem;
+            }
+
+            .social-links a {
+                color: #94a3b8;
+                font-size: 1.4rem;
+                margin: 0 12px;
+                transition: all 0.3s ease;
+                text-decoration: none;
+            }
+
+            /* Brand-specific hover colors */
+            .social-links .fa-github:hover {
+                color: #1e293b;
+                transform: translateY(-2px);
+            }
+            .social-links .fa-linkedin:hover {
+                color: #0a66c2;
+                transform: translateY(-2px);
+            }
         </style>
     </head>
     <body>
-        <div class="main-dashboard-card text-center shadow-lg">
-            <!-- Header -->
-            <div class="header-section">
-                <h1>Live Cloud Native Monitoring App</h1>
-                <h2>Analogue System Telemetry</h2>
+        <div class="dashboard-wrapper">
+            <div class="main-dashboard-card text-center shadow-lg">
+                <!-- Header -->
+                <div class="header-section">
+                    <h1>Docker, AWS ECR, Kebernetes</h1>
+                    <h2>Real-time System Health Monitoring appp</h2>
 
-                <div class="d-flex justify-content-center">
-                    <div
-                        class="status-pill {% if status == 'Healthy' %}bg-soft-success{% else %}bg-soft-danger{% endif %} shadow-sm"
-                    >
-                        <span
-                            style="
-                                color: #64748b;
-                                font-weight: 800;
-                                margin-right: 12px;
-                                border-right: 1px solid rgba(0, 0, 0, 0.1);
-                                padding-right: 12px;
-                            "
-                            >STATUS:</span
+                    <div class="d-flex justify-content-center">
+                        <div
+                            class="status-pill {% if status == 'Healthy' %}bg-soft-success{% else %}bg-soft-danger{% endif %} shadow-sm"
                         >
-                        <span
-                            class="pulse text-{% if status == 'Healthy' %}success{% else %}danger{% endif %}"
-                            >●</span
-                        >
-                        {{ status }}
+                            <span
+                                style="
+                                    color: #64748b;
+                                    font-weight: 800;
+                                    margin-right: 12px;
+                                    border-right: 1px solid rgba(0, 0, 0, 0.1);
+                                    padding-right: 12px;
+                                "
+                                >STATUS:</span
+                            >
+                            <span
+                                class="pulse text-{% if status == 'Healthy' %}success{% else %}danger{% endif %}"
+                                >●</span
+                            >
+                            {{ status }}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Gauge Elements -->
-            <div class="gauge-container">
-                <div id="cpu-gauge"></div>
-                <div id="mem-gauge"></div>
-                <div id="disk-gauge"></div>
-            </div>
+                <!-- Gauge Elements -->
+                <div class="gauge-container">
+                    <div id="cpu-gauge"></div>
+                    <div id="mem-gauge"></div>
+                    <div id="disk-gauge"></div>
+                </div>
 
-            <!-- Footer -->
-            <footer>
-                <p class="mb-1"><strong>Node:</strong> Production-Cluster-01</p>
-                <p class="mb-0">Auto-refresh (5m) | <span id="clock"></span></p>
-            </footer>
+                <!-- Footer -->
+                <footer>
+                    <p class="mb-1">
+                        <strong>Node:</strong> Production-Cluster-01
+                    </p>
+                    <p class="mb-0">
+                        Auto-refresh (5m) | <span id="clock"></span>
+                    </p>
+                    <!-- Social Buttons -->
+                    <div class="top-social-bar">
+                        <a
+                            href="https://github.com/VictorMachimana"
+                            class="social-btn"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            <i class="fa fa-github" aria-hidden="true"></i>
+                        </a>
+                        <a
+                            href="https://www.linkedin.com/in/victor-m-38259110a/"
+                            class="social-btn linkedin-btn"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            <i class="fa fa-linkedin" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </footer>
+            </div>
         </div>
 
         <!-- 2. Local Plotly JS (Required to bypass 403 CDN errors) -->
@@ -194,7 +292,7 @@
                             text: title,
                             font: {
                                 size: 12,
-                                color: "#94a3b8",
+                                color: "#263242",
                                 weight: "bold",
                             },
                         },
