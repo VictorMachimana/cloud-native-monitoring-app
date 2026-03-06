@@ -1,5 +1,6 @@
 services:
   web:
+    image: victormacdevops/flask-system-health-monitor:latest
     build:
       context: .
       target: development
