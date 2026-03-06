@@ -8,3 +8,4 @@ ecr_create_repo_script.py
 __pycache__/
 *.py[cod]
 *$py.class
+.env
