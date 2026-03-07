@@ -1,4 +1,5 @@
 🚀 Live Cloud-Native Monitoring App
+![CI Status](https://github.com)
 A professional-grade system health dashboard built with Python, Flask, and Plotly.js. This application monitors real-time CPU, Memory, and Disk utilization, providing high-fidelity visual telemetry and automated SMTP email alerts when resource thresholds are breached.
 
 # ✨ Features
