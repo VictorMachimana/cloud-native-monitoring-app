@@ -2,6 +2,7 @@ import os
 import psutil
 from flask import Flask, render_template
 from flask_mail import Mail, Message
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -61,6 +62,10 @@ def send_alert_email(cpu, mem):
         mail.send(msg)
     except Exception as e:
         print(f"Failed to send email: {e}")
+
+@app.context_processor
+def inject_now():
+    return {'now': datetime.utcnow()}
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
