@@ -1,62 +1,72 @@
 🚀 Live Cloud-Native Monitoring App
 A professional-grade system health dashboard built with Python, Flask, and Plotly.js. This application monitors real-time CPU, Memory, and Disk utilization, providing high-fidelity visual telemetry and automated SMTP email alerts when resource thresholds are breached.
 
-✨ Features
+# ✨ Features
 * Real-time Telemetry: Interactive gauges for CPU, RAM, and Disk space powered by Plotly.js.
 * Smart Alerting: Automated SMTP notifications triggered at >80% resource utilization with anti-spam logic.
 * Containerized Architecture: Multi-stage Docker builds for optimized development and secure production.
 * Security-First: Runs as a non-root user in production to minimize attack surfaces.
 * Modern UI: Responsive "SaaS-style" dashboard built with Bootstrap 5.
 
-🛠 Tech Stack
+# 🛠 Tech Stack
 * Backend: Python 3.10+, Flask
 * WSGI Server: Gunicorn (Production)
 * Metrics: psutil
-* Frontend: Plotly.js, Bootstrap 5, html
+* Frontend: Plotly.js, Bootstrap 5
 * Alerting: Flask-Mail (SMTP)
-* DevOps: Docker, Docker Compose
+* DevOps: Docker, Docker Compose, GitHub Actions, DigitalOcean
 
-------------------------------
-## 🏗 CI/CD Pipeline
-This project utilizes **GitHub Actions** for automated deployment:
-1. **Lint & Test**: Validates Python code and Dockerfile syntax.
-2. **Build & Push**: Packages the production-stage image and pushes it to a container registry.
-3. **Automated Deploy**: SSH into the production Droplet and executes `docker compose pull && docker compose up -d`.
+# 🏗 CI/CD Pipeline & Infrastructure
+* This project implements a professional GitFlow strategy with automated deployment:
+* Branching Strategy:
+  - development: Used for feature updates and local testing.
+  - master: Production-ready code only.
+* Build & Push: On every push, GitHub Actions builds a multi-stage Docker image and pushes two tags (latest and SHA) to Docker Hub.
+* Automated Deploy: Upon a merge to master, the pipeline securely SSHes into a DigitalOcean Droplet, pulls the new image, and performs a zero-downtime restart via docker compose.
+* Hardened Production: The environment is protected by a Cloud Firewall, resource limits (512MB RAM cap), and automated container health checks.
 
-------------------------------
+## 🌍 Infrastructure Evolution
 
-🚀 How to Run
+### Phase 1: Cloud-Native (AWS EKS)
+Initially architected as a high-availability microservice on **AWS**:
+- **Registry**: Images were hosted on **Amazon ECR** via automated `boto3` scripts.
+- **Orchestration**: Deployed on a managed **Kubernetes (EKS)** cluster with an EC2-backed node group.
+- **Outcome**: Successfully demonstrated horizontal pod autoscaling and self-healing, but was decommissioned to optimize for monthly operating costs.
 
+### Phase 2: Lean DevOps (DigitalOcean + GitHub Actions)
+Migrated to a "Lean" architecture to showcase cost-efficiency without sacrificing automation:
+- **Registry**: Transitioned to **Docker Hub** for simplified image management.
+- **Compute**: Moved to a **DigitalOcean Droplet** (Ubuntu 22.04) reducing monthly overhead by ~90%.
+- **CI/CD**: Replaced manual AWS CLI pushes with a robust **GitHub Actions** pipeline for "Push-to-Deploy" automation.
+
+# 🚀 How to Run
 1. Prerequisites
 * Docker & Docker Compose installed.
-* Gmail App Password: If using Gmail, generate an App Password (Regular passwords will not work).
+* Gmail App Password: Generate an App Password for SMTP.
 
 2. Environment Configuration
-* Create a .env file in the root directory and fill in your credentials:
-- MAIL_USERNAME=your-email@gmail.com
-- MAIL_PASSWORD=your-app-password
-- MAIL_DEFAULT_SENDER=your-email@gmail.com
-- MAIL_RECIPIENT=alert-receiver@gmail.com
+* Create a .env file in the root directory (this is git-ignored):
+* environment variables:
+  - MAIL_USERNAME=your-email@gmail.com
+  - MAIL_PASSWORD=your-app-password
+  - MAIL_DEFAULT_SENDER=your-email@gmail.com
+  - MAIL_RECIPIENT=alert-receiver@gmail.com
 
 3. Development Mode (With Auto-Reloading)
-* This mode mounts your local code into the container. Any change you save in app.py will trigger an instant restart.
-- Run command: `docker compose up`
-* Access the dashboard at: http://localhost:5000
+* Mounts local code into the container for real-time updates:
+- Run the command: `docker compose up`
+* Access: http://localhost:5000
 
-4. Production Build (Secure & Optimized)
-* To build the hardened, non-root production image using Gunicorn:
-* Commands to run:
-# Build the production stage specifically
-`docker build --target production -t health-monitor:latest .`
+4. Production Deployment
+* The production environment is managed via GitHub Actions, but can be run manually using:
+- Build & Run hardened non-root image
+-- Commands:
+  `docker build --target production -t victormacdevops/flask-system-health-monitor:latest .`
+  `docker run -p 5000:5000 --env-file .env victormacdevops/flask-system-health-monitor:latest`
 
-# Run the production container
-`docker run -p 5000:5000 --env-file .env health-monitor:latest`
 
-------------------------------
-🛡 Security & Optimization
-* Multi-Stage Build: Separates development dependencies from the final production artifact.
-* Non-Root Execution: The production container runs under myuser, preventing root-level exploits.
-* Unbuffered Logging: PYTHONUNBUFFERED=1 ensures real-time log visibility in Docker.
-
-------------------------------
-
+# 🛡 Security & Optimization
+* Multi-Stage Build: Resulting in a slim, production-only image without dev dependencies.
+* Non-Root Execution: Container runs under myuser, preventing host-level root exploits.
+* Resource Constraints: Docker Compose limits ensure the app cannot crash the host server.
+* Log Rotation: Automated rotation prevents disk-space exhaustion from container logs.
